@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   Github,
@@ -19,6 +19,92 @@ import {
 import { SiPython, SiJavascript, SiMysql, SiGit, SiGithub } from 'react-icons/si'
 
 const ease = [0.16, 1, 0.3, 1]
+
+const ParticleBackground = () => {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    let animationFrameId
+    let particles = []
+
+    const config = {
+      particleCount: 200,
+      connectionDistance: 300,
+      dotColor: 'rgba(59, 130, 246, 0.6)',
+      lineColor: 'rgba(59, 130, 246, 0.2)',
+      particleSpeed: 0.4,
+      baseRadius: 1.5
+    }
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      initParticles()
+    }
+
+    const initParticles = () => {
+      particles = Array.from({ length: config.particleCount }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * config.particleSpeed,
+        vy: (Math.random() - 0.5) * config.particleSpeed,
+        radius: Math.random() * config.baseRadius + 0.5
+      }))
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      particles.forEach((p, i) => {
+        p.x += p.vx
+        p.y += p.vy
+
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1
+
+        ctx.fillStyle = config.dotColor
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
+        ctx.fill()
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j]
+          const dist = Math.sqrt((p.x - p2.x) ** 2 + (p.y - p2.y) ** 2)
+
+          if (dist < config.connectionDistance) {
+            ctx.strokeStyle = config.lineColor
+            ctx.lineWidth = (1 - dist / config.connectionDistance) * 1.5
+            ctx.beginPath()
+            ctx.moveTo(p.x, p.y)
+            ctx.lineTo(p2.x, p2.y)
+            ctx.stroke()
+          }
+        }
+      })
+
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    window.addEventListener('resize', resizeCanvas)
+    resizeCanvas()
+    animate()
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+      window.removeEventListener('resize', resizeCanvas)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 z-0 bg-[#020202]"
+      style={{ pointerEvents: 'none' }}
+    />
+  )
+}
 
 // ---------------- SECTION TITLE ----------------
 const SectionTitle = ({ children, subtitle }) => (
@@ -58,14 +144,14 @@ const ActOrigin = () => {
   const words = 'Exploring the intersection of data and vision_'.split(' ')
 
   return (
-    <section className="h-screen flex items-center justify-center relative overflow-hidden bg-black px-6">
+    <section className="h-screen flex items-center justify-center relative overflow-hidden bg-black/15 backdrop-blur-[3px] px-6">
 
       <motion.div
         animate={{
           background: [
-            'radial-gradient(circle at 50% 50%, #111 0%, #000 100%)',
-            'radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 100%)',
-            'radial-gradient(circle at 50% 50%, #111 0%, #000 100%)'
+            'radial-gradient(circle at 50% 50%, rgba(17,17,17,0.28) 0%, rgba(0,0,0,0.14) 100%)',
+            'radial-gradient(circle at 50% 50%, rgba(26,26,46,0.28) 0%, rgba(0,0,0,0.14) 100%)',
+            'radial-gradient(circle at 50% 50%, rgba(17,17,17,0.28) 0%, rgba(0,0,0,0.14) 100%)'
           ]
         }}
         transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
@@ -158,22 +244,22 @@ const ActGrowth = () => {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.2, duration: 1 }}
-            className="group p-10 border border-white/5 rounded-3xl"
+            className="group p-10 border border-white/10 bg-black/35 backdrop-blur-md rounded-3xl"
           >
 
             <div className="flex gap-6">
 
-              <div className="w-12 h-12 border border-white/10 rounded-xl flex items-center justify-center">
+              <div className="w-20 h-20 min-w-20 min-h-20 shrink-0 border border-white/10 rounded-2xl flex items-center justify-center [&_svg]:w-10 [&_svg]:h-10">
                 {e.icon}
               </div>
 
               <div>
 
-                <span className="text-xs text-blue-500 font-mono tracking-widest uppercase">
+                <span className="text-sm text-blue-500 font-mono tracking-widest uppercase">
                   {e.period}
                 </span>
 
-                <h3 className="text-2xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
+                <h3 className="text-3xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
                   {e.degree}
                 </h3>
 
@@ -181,12 +267,12 @@ const ActGrowth = () => {
                   <div className="w-[2px] bg-blue-500" />
 
                   <div>
-                    <p className="text-gray-400 italic">{e.institution}</p>
+                    <p className="text-xl text-gray-400 italic">{e.institution}</p>
 
                     <div className="flex gap-3 items-center mt-2">
-                      <span className="text-gray-500 text-sm">{e.sub}</span>
+                      <span className="text-gray-500 text-lg">{e.sub}</span>
 
-                      <span className="px-2 py-1 text-xs bg-blue-500/20 border border-blue-500 text-blue-400 rounded">
+                      <span className="px-2 py-1 text-base bg-blue-500/20 border border-blue-500 text-blue-400 rounded-full">
                         {e.tag}
                       </span>
                     </div>
@@ -290,12 +376,12 @@ const ActExperience = () => {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.2, duration: 1 }}
-            className="group p-10 border border-white/5 rounded-3xl"
+            className="group p-10 border border-white/10 bg-black/35 backdrop-blur-md rounded-3xl"
           >
 
             <div className="flex gap-6">
 
-              <div className="w-12 h-12 border border-white/10 rounded-xl flex items-center justify-center">
+              <div className="w-16 h-16 min-w-16 min-h-16 shrink-0 border border-white/10 rounded-xl flex items-center justify-center [&_svg]:w-9 [&_svg]:h-9">
                 {e.icon}
               </div>
 
@@ -364,12 +450,12 @@ const ActCreations = () => {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.2, duration: 1 }}
-            className="group p-10 border border-white/5 rounded-3xl"
+            className="group p-10 border border-white/10 bg-black/35 backdrop-blur-md rounded-3xl"
           >
 
             <div className="flex items-center gap-4 mb-6">
 
-              <div className="w-12 h-12 border border-white/10 rounded-xl flex items-center justify-center">
+              <div className="w-16 h-16 border border-white/10 rounded-xl flex items-center justify-center [&_svg]:w-9 [&_svg]:h-9">
                 {p.icon}
               </div>
 
@@ -404,7 +490,11 @@ const ActCreations = () => {
 export default function App() {
 
   return (
-    <div className="text-white font-sans antialiased bg-black">
+    <div className="relative text-white font-sans antialiased bg-black">
+
+      <ParticleBackground />
+
+      <div className="relative z-10">
 
       <ActOrigin />
       <ActGrowth />
@@ -412,7 +502,7 @@ export default function App() {
       <ActExperience />
       <ActCreations />
 
-      <footer className="py-32 text-center border-t border-white/5">
+      <footer className="py-32 text-center border-t border-white/5 bg-black/15 backdrop-blur-[3px]">
 
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -459,6 +549,8 @@ export default function App() {
         <p className="text-[10px] text-gray-700 mt-4">Maaz Ansari © 2026</p>
 
       </footer>
+
+      </div>
 
     </div>
   )
