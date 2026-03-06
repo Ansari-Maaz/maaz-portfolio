@@ -20,34 +20,53 @@ import { SiPython, SiJavascript, SiMysql, SiGit, SiGithub } from 'react-icons/si
 
 const ease = [0.16, 1, 0.3, 1]
 
+
+// ---------------- PARTICLE BACKGROUND ----------------
 const ParticleBackground = () => {
   const canvasRef = useRef(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
+
     let animationFrameId
     let particles = []
 
+    const mouse = { x: null, y: null }
+
+    const isMobile = window.matchMedia('(max-width: 640px)').matches
+
     const config = {
-      particleCount: 200,
-      connectionDistance: 300,
-      dotColor: 'rgba(59, 130, 246, 0.6)',
-      lineColor: 'rgba(59, 130, 246, 0.2)',
-      particleSpeed: 0.4,
-      baseRadius: 1.5
+      particleCount: isMobile ? 70 : 90,
+      connectionDistance: isMobile ? 120 : 140,
+      mouseDistance: 160,
+      dotColor: isMobile ? 'rgba(59,130,246,0.85)' : 'rgba(59,130,246,0.7)',
+      lineColor: isMobile ? 'rgba(59,130,246,0.35)' : 'rgba(59,130,246,0.25)',
+      particleSpeed: isMobile ? 0.3 : 0.35,
+      baseRadius: isMobile ? 1.7 : 1.5
     }
 
+    let viewWidth = window.innerWidth
+    let viewHeight = window.innerHeight
+
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      viewWidth = window.innerWidth
+      viewHeight = window.innerHeight
+      const devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+
+      canvas.width = Math.floor(viewWidth * devicePixelRatio)
+      canvas.height = Math.floor(viewHeight * devicePixelRatio)
+      canvas.style.width = `${viewWidth}px`
+      canvas.style.height = `${viewHeight}px`
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0)
+
       initParticles()
     }
 
     const initParticles = () => {
       particles = Array.from({ length: config.particleCount }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: Math.random() * viewWidth,
+        y: Math.random() * viewHeight,
         vx: (Math.random() - 0.5) * config.particleSpeed,
         vy: (Math.random() - 0.5) * config.particleSpeed,
         radius: Math.random() * config.baseRadius + 0.5
@@ -55,14 +74,14 @@ const ParticleBackground = () => {
     }
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, viewWidth, viewHeight)
 
       particles.forEach((p, i) => {
         p.x += p.vx
         p.y += p.vy
 
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1
+        if (p.x < 0 || p.x > viewWidth) p.vx *= -1
+        if (p.y < 0 || p.y > viewHeight) p.vy *= -1
 
         ctx.fillStyle = config.dotColor
         ctx.beginPath()
@@ -75,10 +94,23 @@ const ParticleBackground = () => {
 
           if (dist < config.connectionDistance) {
             ctx.strokeStyle = config.lineColor
-            ctx.lineWidth = (1 - dist / config.connectionDistance) * 1.5
+            ctx.lineWidth = (1 - dist / config.connectionDistance) * 1.2
             ctx.beginPath()
             ctx.moveTo(p.x, p.y)
             ctx.lineTo(p2.x, p2.y)
+            ctx.stroke()
+          }
+        }
+
+        if (mouse.x && mouse.y) {
+          const distMouse = Math.sqrt((p.x - mouse.x) ** 2 + (p.y - mouse.y) ** 2)
+
+          if (distMouse < config.mouseDistance) {
+            ctx.strokeStyle = 'rgba(59,130,246,0.4)'
+            ctx.lineWidth = 1
+            ctx.beginPath()
+            ctx.moveTo(p.x, p.y)
+            ctx.lineTo(mouse.x, mouse.y)
             ctx.stroke()
           }
         }
@@ -87,13 +119,44 @@ const ParticleBackground = () => {
       animationFrameId = requestAnimationFrame(animate)
     }
 
+    const handleMouseMove = e => {
+      mouse.x = e.clientX
+      mouse.y = e.clientY
+    }
+
+    const handleTouchMove = e => {
+      const touch = e.touches?.[0]
+      if (!touch) return
+      mouse.x = touch.clientX
+      mouse.y = touch.clientY
+    }
+
+    const handleTouchEnd = () => {
+      mouse.x = null
+      mouse.y = null
+    }
+
+    const handleMouseLeave = () => {
+      mouse.x = null
+      mouse.y = null
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseleave', handleMouseLeave)
+    window.addEventListener('touchmove', handleTouchMove, { passive: true })
+    window.addEventListener('touchend', handleTouchEnd)
     window.addEventListener('resize', resizeCanvas)
+
     resizeCanvas()
     animate()
 
     return () => {
       cancelAnimationFrame(animationFrameId)
       window.removeEventListener('resize', resizeCanvas)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseleave', handleMouseLeave)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleTouchEnd)
     }
   }, [])
 
@@ -108,21 +171,21 @@ const ParticleBackground = () => {
 
 // ---------------- SECTION TITLE ----------------
 const SectionTitle = ({ children, subtitle }) => (
-  <div className="mb-24 text-center">
+  <div className="mb-16 sm:mb-20 md:mb-24 text-center">
 
     <motion.h2
       initial={{ opacity: 0, y: 40, letterSpacing: '0.4em' }}
       whileInView={{ opacity: 1, y: 0, letterSpacing: '0.15em' }}
       viewport={{ once: false }}
       transition={{ duration: 1.4, ease }}
-      className="text-4xl md:text-7xl font-extralight uppercase text-white mb-6"
+      className="text-3xl sm:text-4xl md:text-7xl font-extralight uppercase text-white mb-5 sm:mb-6"
     >
       {children}
     </motion.h2>
 
     <motion.div
-      initial={{ width: 0 }}
-      whileInView={{ width: '100px' }}
+      initial={{ width: 0 }} nonce=''
+      whileInView={{ width: '100px' }}  
       transition={{ duration: 1 }}
       className="h-[1px] bg-blue-500 mx-auto mb-6"
     />
@@ -131,7 +194,7 @@ const SectionTitle = ({ children, subtitle }) => (
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 0.6 }}
       transition={{ delay: 0.4, duration: 1 }}
-      className="text-gray-400 text-lg md:text-xl italic"
+      className="text-gray-400 text-base sm:text-lg md:text-xl italic"
     >
       {subtitle}
     </motion.p>
@@ -144,7 +207,7 @@ const ActOrigin = () => {
   const words = 'Exploring the intersection of data and vision_'.split(' ')
 
   return (
-    <section className="h-screen flex items-center justify-center relative overflow-hidden bg-black/15 backdrop-blur-[3px] px-6">
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden bg-black/8 backdrop-blur-[3px] px-4 sm:px-6">
 
       <motion.div
         animate={{
@@ -160,14 +223,14 @@ const ActOrigin = () => {
 
       <div className="text-center max-w-5xl">
 
-        <div className="flex flex-wrap justify-center gap-x-4 mb-6">
+        <div className="flex flex-wrap justify-center gap-x-2 sm:gap-x-4 mb-5 sm:mb-6">
           {words.map((word, i) => (
             <motion.span
               key={i}
               initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{ delay: i * 0.12, duration: 1.4, ease }}
-              className={`text-1xl md:text-2xl font-light ${word.endsWith('_') ? 'text-blue-500' : 'text-gray-400'}`}
+              className={`text-sm sm:text-lg md:text-2xl font-light ${word.endsWith('_') ? 'text-blue-500' : 'text-gray-400'}`}
             >
               {word}
             </motion.span>
@@ -178,7 +241,7 @@ const ActOrigin = () => {
           initial={{ letterSpacing: '0.8em', opacity: 0 }}
           animate={{ letterSpacing: '0.15em', opacity: 1 }}
           transition={{ delay: 1.4, duration: 2.5, ease }}
-          className="text-5xl md:text-8xl font-black text-white uppercase leading-none whitespace-nowrap"
+          className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase leading-none"
         >
           MAAZ ANSARI
         </motion.h1>
@@ -187,7 +250,7 @@ const ActOrigin = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}
           transition={{ delay: 3, duration: 2 }}
-          className="mt-6 text-sm md:text-xl tracking-[0.5em] text-blue-400 uppercase"
+          className="mt-4 sm:mt-6 text-[10px] sm:text-sm md:text-lg tracking-[0.2em] sm:tracking-[0.35em] md:tracking-[0.5em] text-blue-400 uppercase"
         >
           Innovating at the Intersection of AI and Data
         </motion.p>
@@ -231,7 +294,7 @@ const ActGrowth = () => {
   ]
 
   return (
-    <section className="py-40 px-6 max-w-5xl mx-auto">
+    <section className="py-24 sm:py-32 md:py-40 px-4 sm:px-6 max-w-5xl mx-auto">
 
       <SectionTitle subtitle="Structured foundations for complex systems.">
         Education
@@ -244,35 +307,35 @@ const ActGrowth = () => {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.2, duration: 1 }}
-            className="group p-10 border border-white/10 bg-black/35 backdrop-blur-md rounded-3xl"
+            className="group p-6 sm:p-8 md:p-10 border border-white/10 bg-black/8 backdrop-blur-[3px] rounded-3xl"
           >
 
-            <div className="flex gap-6">
+            <div className="flex gap-4 sm:gap-6">
 
-              <div className="w-20 h-20 min-w-20 min-h-20 shrink-0 border border-white/10 rounded-2xl flex items-center justify-center [&_svg]:w-10 [&_svg]:h-10">
+              <div className="w-12 h-12 min-w-12 min-h-12 sm:w-14 sm:h-14 sm:min-w-14 sm:min-h-14 md:w-16 md:h-16 md:min-w-16 md:min-h-16 shrink-0 border border-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center [&_svg]:w-6 [&_svg]:h-6 sm:[&_svg]:w-7 sm:[&_svg]:h-7 md:[&_svg]:w-8 md:[&_svg]:h-8">
                 {e.icon}
               </div>
 
               <div>
 
-                <span className="text-sm text-blue-500 font-mono tracking-widest uppercase">
+                <span className="text-xs sm:text-sm text-blue-500 font-mono tracking-[0.2em] sm:tracking-widest uppercase">
                   {e.period}
                 </span>
 
-                <h3 className="text-3xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
+                <h3 className="text-xl sm:text-2xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
                   {e.degree}
                 </h3>
 
-                <div className="flex gap-4 mt-3">
+                <div className="flex gap-4 mt-4">
                   <div className="w-[2px] bg-blue-500" />
 
                   <div>
-                    <p className="text-xl text-gray-400 italic">{e.institution}</p>
+                    <p className="text-base sm:text-lg text-gray-400 italic">{e.institution}</p>
 
-                    <div className="flex gap-3 items-center mt-2">
-                      <span className="text-gray-500 text-lg">{e.sub}</span>
+                    <div className="flex gap-2 sm:gap-3 items-center mt-2">
+                      <span className="text-gray-500 text-sm sm:text-base">{e.sub}</span>
 
-                      <span className="px-2 py-1 text-base bg-blue-500/20 border border-blue-500 text-blue-400 rounded-full">
+                      <span className="px-2 py-1 text-xs sm:text-sm bg-blue-500/20 border border-blue-500 text-blue-400 rounded-full">
                         {e.tag}
                       </span>
                     </div>
@@ -297,40 +360,40 @@ const ActGrowth = () => {
 const ActEvolution = () => {
 
   const skills = [
-    { name: 'Python', icon: <SiPython className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'JavaScript', icon: <SiJavascript className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'Git', icon: <SiGit className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'GitHub', icon: <SiGithub className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'MySQL', icon: <SiMysql className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'Computer Vision', icon: <ScanSearch className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'Server Basics', icon: <Server className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'Networking', icon: <Zap className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'NLP', icon: <BrainCircuit className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
-    { name: 'Problem Solving', icon: <Sparkles className="w-10 h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> }
+    { name: 'Python', icon: <SiPython className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'JavaScript', icon: <SiJavascript className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'Git', icon: <SiGit className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'GitHub', icon: <SiGithub className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'MySQL', icon: <SiMysql className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'Computer Vision', icon: <ScanSearch className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'Server Basics', icon: <Server className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'Networking', icon: <Zap className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'NLP', icon: <BrainCircuit className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> },
+    { name: 'Problem Solving', icon: <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-gray-400 transition-colors duration-300 group-hover:text-blue-500" /> }
   ]
 
   return (
-    <section className="py-40 px-6 bg-white/[0.01]">
+    <section className="py-24 sm:py-32 md:py-40 px-4 sm:px-6 bg-white/[0.01]">
 
       <SectionTitle subtitle="A technical toolkit evolving with every project.">
         Skills
       </SectionTitle>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4 sm:gap-6">
         {skills.map((s, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05, duration: 0.6 }}
-            className="group p-8 border border-white/5 rounded-2xl text-center"
+            className="group p-5 sm:p-7 md:p-8 border border-white/10 bg-black/8 backdrop-blur-[3px] rounded-2xl text-center"
           >
 
             <div className="flex justify-center mb-4">
               {s.icon}
             </div>
 
-            <span className="text-white uppercase text-sm tracking-widest transition-colors duration-300 group-hover:text-blue-500">
+            <span className="text-white uppercase text-[11px] sm:text-sm tracking-[0.14em] sm:tracking-widest transition-colors duration-300 group-hover:text-blue-500">
               {s.name}
             </span>
 
@@ -363,7 +426,7 @@ const ActExperience = () => {
   ]
 
   return (
-    <section className="py-40 px-6 max-w-5xl mx-auto">
+    <section className="py-24 sm:py-32 md:py-40 px-4 sm:px-6 max-w-5xl mx-auto">
 
       <SectionTitle subtitle="Real-world application of technical theory.">
         Experience
@@ -376,29 +439,29 @@ const ActExperience = () => {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.2, duration: 1 }}
-            className="group p-10 border border-white/10 bg-black/35 backdrop-blur-md rounded-3xl"
+            className="group p-6 sm:p-8 md:p-10 border border-white/10 bg-black/8 backdrop-blur-[3px] rounded-3xl"
           >
 
-            <div className="flex gap-6">
+            <div className="flex gap-4 sm:gap-6">
 
-              <div className="w-16 h-16 min-w-16 min-h-16 shrink-0 border border-white/10 rounded-xl flex items-center justify-center [&_svg]:w-9 [&_svg]:h-9">
+              <div className="w-12 h-12 min-w-12 min-h-12 sm:w-14 sm:h-14 sm:min-w-14 sm:min-h-14 md:w-16 md:h-16 md:min-w-16 md:min-h-16 shrink-0 border border-white/10 rounded-xl flex items-center justify-center [&_svg]:w-6 [&_svg]:h-6 sm:[&_svg]:w-7 sm:[&_svg]:h-7 md:[&_svg]:w-9 md:[&_svg]:h-9">
                 {e.icon}
               </div>
 
               <div>
 
-                <h3 className="text-2xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
+                <h3 className="text-xl sm:text-2xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
                   {e.role}
                 </h3>
 
-                <p className="text-gray-400 italic">{e.company}</p>
+                <p className="text-sm sm:text-base text-gray-400 italic">{e.company}</p>
 
                 <div className="flex gap-4 mt-4">
                   <div className="w-[2px] bg-blue-500" />
-                  <p className="text-gray-400">{e.desc}</p>
+                  <p className="text-sm sm:text-base text-gray-400">{e.desc}</p>
                 </div>
 
-                <p className="text-blue-500 text-xs font-mono mt-4">{e.date}</p>
+                <p className="text-blue-500 text-[10px] sm:text-xs font-mono mt-3 sm:mt-4">{e.date}</p>
 
               </div>
 
@@ -437,7 +500,7 @@ const ActCreations = () => {
   ]
 
   return (
-    <section className="py-40 px-6 bg-white/[0.01]">
+    <section className="py-24 sm:py-32 md:py-40 px-4 sm:px-6 bg-white/[0.01]">
 
       <SectionTitle subtitle="Turning logic into functional software solutions.">
         Projects
@@ -450,16 +513,16 @@ const ActCreations = () => {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.2, duration: 1 }}
-            className="group p-10 border border-white/10 bg-black/35 backdrop-blur-md rounded-3xl"
+            className="group p-6 sm:p-8 md:p-10 border border-white/10 bg-black/8 backdrop-blur-[3px] rounded-3xl"
           >
 
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
 
-              <div className="w-16 h-16 border border-white/10 rounded-xl flex items-center justify-center [&_svg]:w-9 [&_svg]:h-9">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border border-white/10 rounded-xl flex items-center justify-center [&_svg]:w-6 [&_svg]:h-6 sm:[&_svg]:w-7 sm:[&_svg]:h-7 md:[&_svg]:w-9 md:[&_svg]:h-9">
                 {p.icon}
               </div>
 
-              <h3 className="text-2xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
+              <h3 className="text-xl sm:text-2xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
                 {p.title}
               </h3>
 
@@ -467,7 +530,7 @@ const ActCreations = () => {
 
             <div className="flex flex-wrap gap-2 mb-6">
               {p.tags.map(tag => (
-                <span key={tag} className="px-3 py-1 text-xs border border-white/10 rounded-full text-gray-400 transition-colors duration-300 group-hover:text-blue-400 group-hover:border-blue-500">
+                <span key={tag} className="px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs border border-white/10 rounded-full text-gray-400 transition-colors duration-300 group-hover:text-blue-400 group-hover:border-blue-500">
                   {tag}
                 </span>
               ))}
@@ -475,7 +538,7 @@ const ActCreations = () => {
 
             <div className="flex gap-4">
               <div className="w-[2px] bg-blue-500" />
-              <p className="text-gray-400">{p.desc}</p>
+              <p className="text-sm sm:text-base text-gray-400">{p.desc}</p>
             </div>
 
           </motion.div>
@@ -502,13 +565,13 @@ export default function App() {
       <ActExperience />
       <ActCreations />
 
-      <footer className="py-32 text-center border-t border-white/5 bg-black/15 backdrop-blur-[3px]">
+      <footer className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 text-center border-t border-white/5 bg-black/8 backdrop-blur-[3px]">
 
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          className="text-4xl md:text-6xl font-black mb-6"
+          className="text-3xl sm:text-4xl md:text-6xl font-black mb-5 sm:mb-6"
         >
           Let's Build Something <span className="text-blue-500">Impactful</span>
         </motion.h2>
@@ -517,7 +580,7 @@ export default function App() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-gray-400 max-w-2xl mx-auto mb-12"
+          className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto mb-10 sm:mb-12"
         >
           I'm always interested in working on challenging problems involving AI and Data.
           <br />If you have an opportunity or collaboration idea, feel free to reach out.
@@ -525,12 +588,12 @@ export default function App() {
 
         <a
           href="mailto:ansarimaaz1710@gmail.com"
-          className="px-10 py-5 bg-white text-black rounded-full font-bold"
+          className="px-7 sm:px-10 py-3.5 sm:py-5 text-sm sm:text-base bg-white text-black rounded-full font-bold"
         >
           Initiate Contact
         </a>
 
-        <div className="mt-16 flex justify-center gap-8 text-gray-500">
+        <div className="mt-12 sm:mt-16 flex justify-center gap-6 sm:gap-8 text-gray-500 [&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6">
 
           <a href="https://github.com/Ansari-Maaz" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition-colors">
             <Github />
@@ -542,7 +605,7 @@ export default function App() {
 
         </div>
 
-        <div className="mt-8 text-xs text-gray-600 flex justify-center items-center gap-2">
+        <div className="mt-6 sm:mt-8 text-[11px] sm:text-xs text-gray-600 flex justify-center items-center gap-2">
           <MapPin size={12} /> Mumbai, Maharashtra
         </div>
 
