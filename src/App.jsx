@@ -18,7 +18,7 @@ import {
   Cpu
 } from 'lucide-react'
 
-import { SiPython, SiJavascript, SiMysql, SiGit, SiGithub } from 'react-icons/si'
+import { SiPython, SiJavascript, SiMysql, SiGit, SiGithub, SiX } from 'react-icons/si'
 
 const ease = [0.16, 1, 0.3, 1]
 
@@ -267,13 +267,13 @@ const ActOrigin = () => {
             href="https://drive.google.com/file/d/1q55tMRmXCtT0Vjr0H04WNvF3noMkRQ0H/view?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-7 sm:px-10 py-3.5 sm:py-4 bg-white text-black rounded-full font-bold text-sm sm:text-lg transition-transform duration-300 hover:scale-105 hover:text-black"
+            className="inline-flex items-center gap-2 px-6 sm:px-10 py-3 sm:py-4 bg-white text-black rounded-full font-bold text-xs sm:text-lg transition-transform duration-300 hover:scale-105 hover:text-black"
           >
             <Download className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
             VIEW RESUME
           </a>
 
-          <div className="flex items-center gap-8 sm:gap-10 text-gray-500 [&_svg]:w-6 [&_svg]:h-6 sm:[&_svg]:w-7 sm:[&_svg]:h-7">
+          <div className="flex items-center gap-8 sm:gap-10 text-gray-500 [&_svg]:w-7 [&_svg]:h-7 sm:[&_svg]:w-8 sm:[&_svg]:h-8">
             <a href="https://github.com/Ansari-Maaz" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors">
               <Github />
             </a>
@@ -619,12 +619,16 @@ export default function App() {
 
         <a
           href="mailto:ansarimaaz1710@gmail.com"
-          className="px-7 sm:px-10 py-3.5 sm:py-5 text-sm sm:text-base bg-white text-black rounded-full font-bold"
+          className="inline-flex items-center justify-center px-7 sm:px-10 py-3.5 sm:py-5 text-sm sm:text-base bg-white text-black rounded-full font-bold transition-transform duration-300 transform-gpu hover:scale-105 hover:text-black hover:blur-none"
         >
           Initiate Contact
         </a>
 
-        <div className="mt-12 sm:mt-16 flex justify-center gap-6 sm:gap-8 text-gray-500 [&_svg]:w-5 [&_svg]:h-5 sm:[&_svg]:w-6 sm:[&_svg]:h-6">
+        <p className="mt-8 sm:mt-10 text-xs sm:text-sm tracking-[0.2em] uppercase text-gray-500">
+          Follow me
+        </p>
+
+        <div className="mt-5 sm:mt-6 flex justify-center gap-6 sm:gap-8 text-gray-500 [&_svg]:w-6 [&_svg]:h-6 sm:[&_svg]:w-7 sm:[&_svg]:h-7">
 
           <a href="https://github.com/Ansari-Maaz" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition-colors">
             <Github />
@@ -632,6 +636,10 @@ export default function App() {
 
           <a href="https://www.linkedin.com/in/maazansari1710/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition-colors">
             <Linkedin />
+          </a>
+
+          <a href="https://x.com/https_Maaz" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500 transition-colors">
+            <SiX />
           </a>
 
         </div>
