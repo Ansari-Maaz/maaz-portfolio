@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import {
   Github,
   Linkedin,
+  Download,
+  Mail,
   Server,
   Terminal,
   FileText,
@@ -255,6 +257,35 @@ const ActOrigin = () => {
           Innovating at the Intersection of AI and Data
         </motion.p>
 
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 3.2, duration: 0.8 }}
+          className="mt-8 sm:mt-10 flex flex-col items-center gap-8"
+        >
+          <a
+            href="https://drive.google.com/file/d/1q55tMRmXCtT0Vjr0H04WNvF3noMkRQ0H/view?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-7 sm:px-10 py-3.5 sm:py-4 bg-white text-black rounded-full font-bold text-sm sm:text-lg transition-transform duration-300 hover:scale-105 hover:text-black"
+          >
+            <Download className="w-4 h-4 sm:w-5 sm:h-5 text-black" />
+            VIEW RESUME
+          </a>
+
+          <div className="flex items-center gap-8 sm:gap-10 text-gray-500 [&_svg]:w-6 [&_svg]:h-6 sm:[&_svg]:w-7 sm:[&_svg]:h-7">
+            <a href="https://github.com/Ansari-Maaz" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors">
+              <Github />
+            </a>
+            <a href="https://www.linkedin.com/in/maazansari1710/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-500 transition-colors">
+              <Linkedin />
+            </a>
+            <a href="mailto:ansarimaaz1710@gmail.com" className="text-gray-500 hover:text-blue-500 transition-colors">
+              <Mail />
+            </a>
+          </div>
+        </motion.div>
+
       </div>
 
       <motion.div
@@ -278,7 +309,7 @@ const ActGrowth = () => {
       degree: 'B.E in Information Technology',
       institution: 'Shree L.R. Tiwari College of Engineering',
       sub: 'University of Mumbai',
-      tag: 'CGPA: 7.5',
+      tag: 'CGPA:7.5',
       desc: '' ,
       icon: <University className="text-gray-400 transition-colors duration-300 group-hover:text-blue-500" />
     },
@@ -322,20 +353,20 @@ const ActGrowth = () => {
                   {e.period}
                 </span>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-white transition-colors duration-300 group-hover:text-blue-500">
+                <h3 className="text-base sm:text-2xl font-bold text-white whitespace-nowrap transition-colors duration-300 group-hover:text-blue-500">
                   {e.degree}
                 </h3>
 
                 <div className="flex gap-4 mt-4">
-                  <div className="w-[2px] bg-blue-500" />
+                  <div className="w-px bg-blue-500" />
 
                   <div>
-                    <p className="text-base sm:text-lg text-gray-400 italic">{e.institution}</p>
+                    <p className={`text-base sm:text-lg text-gray-400 ${e.institution === 'Shree L.R. Tiwari College of Engineering' ? 'sm:whitespace-nowrap' : ''}`}>{e.institution}</p>
 
                     <div className="flex gap-2 sm:gap-3 items-center mt-2">
                       <span className="text-gray-500 text-sm sm:text-base">{e.sub}</span>
 
-                      <span className="px-2 py-1 text-xs sm:text-sm bg-blue-500/20 border border-blue-500 text-blue-400 rounded-full">
+                      <span className="text-blue-400 text-sm sm:text-base font-mono tracking-wide">
                         {e.tag}
                       </span>
                     </div>
@@ -457,7 +488,7 @@ const ActExperience = () => {
                 <p className="text-sm sm:text-base text-gray-400 italic">{e.company}</p>
 
                 <div className="flex gap-4 mt-4">
-                  <div className="w-[2px] bg-blue-500" />
+                  <div className="w-px bg-blue-500" />
                   <p className="text-sm sm:text-base text-gray-400">{e.desc}</p>
                 </div>
 
@@ -537,7 +568,7 @@ const ActCreations = () => {
             </div>
 
             <div className="flex gap-4">
-              <div className="w-[2px] bg-blue-500" />
+              <div className="w-px bg-blue-500" />
               <p className="text-sm sm:text-base text-gray-400">{p.desc}</p>
             </div>
 
