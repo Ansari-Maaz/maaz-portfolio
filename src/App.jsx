@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 
 import { SiPython, SiJavascript, SiMysql, SiGit, SiGithub } from 'react-icons/si'
+import { Analytics } from '@vercel/analytics/react'
 
 const ease = [0.16, 1, 0.3, 1]
 
@@ -645,6 +646,8 @@ export default function App() {
       </footer>
 
       </div>
+
+      <Analytics />
 
     </div>
   )
